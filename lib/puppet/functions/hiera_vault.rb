@@ -251,6 +251,14 @@ Puppet::Functions.create_function(:hiera_vault) do
 
       # Only kv mounts supported so far
       kv_mounts.each_pair do |mount, paths|
+        if options['mount_prefix']
+          mount = File.join(options['mount_prefix'], mount)
+        end
+
+        if options['mount_suffix']
+          mount = File.join(mount, options['mount_suffix'])
+        end
+
         interpolate(context, paths).each do |path|
           secretpath = context.interpolate(File.join(mount, path))
 
