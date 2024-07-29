@@ -83,6 +83,11 @@ Puppet::Functions.create_function(:hiera_vault) do
     raise Puppet::DataBinding::LookupError, "[hiera-vault] Must install json gem to use hiera-vault backend"
   end
   begin
+    require 'yaml'
+  rescue LoadError => e
+    raise Puppet::DataBinding::LookupError, "[hiera-vault] Must install yaml gem to use hiera-vault backend"
+  end
+  begin
     require 'vault'
   rescue LoadError => e
     raise Puppet::DataBinding::LookupError, "[hiera-vault] Must install vault gem to use hiera-vault backend"
@@ -129,7 +134,18 @@ Puppet::Functions.create_function(:hiera_vault) do
     token
   end
 
+  def enforced_options()
+    settings_file = '/etc/puppetlabs/puppet/hiera_vault.yaml'
+    if File.file?(settings_file)
+      YAML.load_file(settings_file)
+    else
+      {}
+    end
+  end
+
   def lookup_key(key, options, context)
+
+    options = options.merge(enforced_options)
 
     if confine_keys = options['confine_to_keys']
       raise ArgumentError, '[hiera-vault] confine_to_keys must be an array' unless confine_keys.is_a?(Array)
