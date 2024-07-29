@@ -259,8 +259,10 @@ Puppet::Functions.create_function(:hiera_vault) do
           mount = File.join(mount, options['mount_suffix'])
         end
 
+        mount = context.interpolate(mount)
+
         interpolate(context, paths).each do |path|
-          secretpath = context.interpolate(File.join(mount, path))
+          secretpath = File.join(mount, path)
 
           context.explain { "[hiera-vault] Looking in path #{secretpath} for #{key}" }
 
